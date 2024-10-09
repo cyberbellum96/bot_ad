@@ -50,36 +50,145 @@
             top: 50%;
             transform: translateY(-50%);
         }
-        .image-preview {
-            margin-top: 10px;
-        }
-        .image-preview img {
-            max-width: 100px;
-            max-height: 100px;
-            margin-right: 10px;
-        }
     </style>
 </head>
 <body>
 
 <!-- Форма для розділу "Оголошення" -->
-<form id="announcementForm" style="display: none;" enctype="multipart/form-data">
+<form id="announcementForm" style="display: none;">
     <h2>Подати оголошення</h2>
-    <!-- Інші поля -->
     <div class="form-group">
         <label for="title">Заголовок оголошення:</label>
         <input type="text" id="title" required>
     </div>
-    <!-- Поле для завантаження зображень -->
     <div class="form-group">
-        <label for="announcementImages">Додати фото:</label>
-        <input type="file" id="announcementImages" multiple accept="image/*">
-        <div class="image-preview" id="announcementImagePreview"></div>
+        <label for="category">Категорія:</label>
+        <select id="category" required>
+            <option value="">Оберіть категорію</option>
+            <option value="jobs">Робота</option>
+            <option value="services">Послуги</option>
+            <option value="events">Події</option>
+            <option value="other">Інше</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="description">Текст оголошення:</label>
+        <textarea id="description" rows="4" required></textarea>
+    </div>
+    <div class="form-group">
+        <label for="contact">Контактні дані:</label>
+        <input type="text" id="contact" required>
     </div>
     <button type="submit">Надіслати оголошення</button>
 </form>
 
-<!-- Інші форми (реклама, купівля, продаж) з подібними полями для фото -->
+<!-- Форма для розділу "Реклама" -->
+<form id="advertisingForm" style="display: none;">
+    <h2>Розмістити рекламу</h2>
+    <div class="form-group">
+        <label for="companyName">Назва компанії:</label>
+        <input type="text" id="companyName" required>
+    </div>
+    <div class="form-group">
+        <label for="adType">Тип реклами:</label>
+        <select id="adType" required>
+            <option value="">Оберіть тип реклами</option>
+            <option value="banner">Банерна реклама</option>
+            <option value="text">Текстова реклама</option>
+            <option value="post">Рекламний пост</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="adDescription">Опис реклами:</label>
+        <textarea id="adDescription" rows="4" required></textarea>
+    </div>
+    <div class="form-group">
+        <label for="budget">Бюджет:</label>
+        <div class="price-input">
+            <input type="number" id="budget" required>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="adContact">Контактна особа:</label>
+        <input type="text" id="adContact" required>
+    </div>
+    <button type="submit">Надіслати заявку</button>
+</form>
+
+<!-- Форма для розділу "Купівля" -->
+<form id="buyingForm" style="display: none;">
+    <h2>Купівля товару</h2>
+    <div class="form-group">
+        <label for="productName">Що шукаєте:</label>
+        <input type="text" id="productName" required>
+    </div>
+    <div class="form-group">
+        <label for="buyingCategory">Категорія:</label>
+        <select id="buyingCategory" required>
+            <option value="">Оберіть категорію</option>
+            <option value="electronics">Електроніка</option>
+            <option value="furniture">Меблі</option>
+            <option value="transport">Транспорт</option>
+            <option value="other">Інше</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="maxPrice">Максимальна ціна:</label>
+        <div class="price-input">
+            <input type="number" id="maxPrice" required>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="buyerDescription">Додатковий опис:</label>
+        <textarea id="buyerDescription" rows="4"></textarea>
+    </div>
+    <div class="form-group">
+        <label for="buyerContact">Контактні дані:</label>
+        <input type="text" id="buyerContact" required>
+    </div>
+    <button type="submit">Надіслати запит</button>
+</form>
+
+<!-- Форма для розділу "Продаж" -->
+<form id="sellingForm" style="display: none;">
+    <h2>Продаж товару</h2>
+    <div class="form-group">
+        <label for="itemName">Назва товару:</label>
+        <input type="text" id="itemName" required>
+    </div>
+    <div class="form-group">
+        <label for="sellingCategory">Категорія:</label>
+        <select id="sellingCategory" required>
+            <option value="">Оберіть категорію</option>
+            <option value="electronics">Електроніка</option>
+            <option value="furniture">Меблі</option>
+            <option value="transport">Транспорт</option>
+            <option value="other">Інше</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="price">Ціна:</label>
+        <div class="price-input">
+            <input type="number" id="price" required>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="condition">Стан:</label>
+        <select id="condition" required>
+            <option value="new">Новий</option>
+            <option value="used">Вживаний</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="sellerDescription">Опис товару:</label>
+        <textarea id="sellerDescription" rows="4" required></textarea>
+    </div>
+    <div class="form-group">
+        <label for="sellerContact">Контактні дані:</label>
+        <input type="text" id="sellerContact" required>
+    </div>
+    <button type="submit">Розмістити оголошення</button>
+</form>
 
 <script>
     let tg = window.Telegram.WebApp;
@@ -100,70 +209,29 @@
         }
     }
 
-    // Функція для відображення попереднього перегляду зображень
-    function previewImages(input, previewContainerId) {
-        const previewContainer = document.getElementById(previewContainerId);
-        previewContainer.innerHTML = ''; // Очищуємо попередній перегляд
-        
-        Array.from(input.files).forEach(file => {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const img = document.createElement('img');
-                img.src = e.target.result;
-                previewContainer.appendChild(img);
-            };
-            reader.readAsDataURL(file);
-        });
-    }
-
-    // Обробники для полів зображень
-    document.getElementById('announcementImages').addEventListener('change', function() {
-        previewImages(this, 'announcementImagePreview');
-    });
-
     // Обробники подій для кожної форми
     const forms = ['announcementForm', 'advertisingForm', 'buyingForm', 'sellingForm'];
     forms.forEach(formId => {
         document.getElementById(formId)?.addEventListener('submit', function(e) {
             e.preventDefault();
-            const formData = new FormData();
-
+            const formData = {};
+            
             // Збираємо всі поля форми
             this.querySelectorAll('input, textarea, select').forEach(element => {
-                if (element.type === 'file') {
-                    // Додаємо файли (зображення) до FormData
-                    Array.from(element.files).forEach((file, index) => {
-                        formData.append(`${element.id}[${index}]`, file);
-                    });
-                } else {
-                    formData.append(element.id, element.value);
-                }
+                formData[element.id] = element.value;
             });
-
+            
             // Додаємо тип форми
-            formData.append('formType', formId.replace('Form', ''));
-
-            // Конвертуємо FormData в об'єкт і потім у JSON
-            const data = {};
-            formData.forEach((value, key) => {
-                if (value instanceof File) {
-                    data[key] = value.name; // Ім'я файлу
-                } else {
-                    data[key] = value;
-                }
-            });
-
+            formData.formType = formId.replace('Form', '');
+            
             // Відправляємо дані в Telegram
-            tg.sendData(JSON.stringify(data));
-
-            // Закриваємо WebApp після відправки
+            tg.sendData(JSON.stringify(formData));
             tg.close();
         });
     });
 
-    // Показуємо потрібну форму при завантаженні
+    // Показуємо потрібну форму при завантаженні .
     showForm();
 </script>
-
 </body>
 </html>
