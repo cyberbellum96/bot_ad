@@ -1,7 +1,8 @@
+<!-- announcement.html -->
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Форма подання</title>
+    <title>Форма оголошення</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -39,147 +40,58 @@
         button:hover {
             background-color: #006699;
         }
-        .photo-preview {
-            max-width: 100%;
-            margin: 10px 0;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
+        .price-input {
+            position: relative;
         }
-        .photo-preview img {
+        .price-input:after {
+            content: "грн";
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        .image-preview {
+            margin-top: 10px;
+        }
+        .image-preview img {
             max-width: 100px;
-            height: auto;
-            border-radius: 4px;
-        }
-        .photo-upload {
-            margin: 10px 0;
-        }
-        #photoCount {
-            font-size: 12px;
-            color: #666;
-            margin-top: 5px;
+            max-height: 100px;
+            margin-right: 10px;
         }
     </style>
 </head>
 <body>
 
-<form id="sellingForm" style="display: none;">
-    <h2>Продаж товару</h2>
+<!-- Форма для розділу "Оголошення" -->
+<form id="announcementForm" style="display: none;" enctype="multipart/form-data">
+    <h2>Подати оголошення</h2>
+    <!-- Інші поля -->
     <div class="form-group">
-        <label for="itemName">Назва товару:</label>
-        <input type="text" id="itemName" required>
+        <label for="title">Заголовок оголошення:</label>
+        <input type="text" id="title" required>
     </div>
+    <!-- Поле для завантаження зображень -->
     <div class="form-group">
-        <label for="sellingCategory">Категорія:</label>
-        <select id="sellingCategory" required>
-            <option value="">Оберіть категорію</option>
-            <option value="electronics">Електроніка</option>
-            <option value="furniture">Меблі</option>
-            <option value="transport">Транспорт</option>
-            <option value="other">Інше</option>
-        </select>
+        <label for="announcementImages">Додати фото:</label>
+        <input type="file" id="announcementImages" multiple accept="image/*">
+        <div class="image-preview" id="announcementImagePreview"></div>
     </div>
-    <div class="form-group">
-        <label for="price">Ціна:</label>
-        <div class="price-input">
-            <input type="number" id="price" required>
-        </div>
-    </div>
-    <div class="form-group">
-        <label for="condition">Стан:</label>
-        <select id="condition" required>
-            <option value="new">Новий</option>
-            <option value="used">Вживаний</option>
-        </select>
-    </div>
-    <div class="form-group">
-        <label for="sellerDescription">Опис товару:</label>
-        <textarea id="sellerDescription" rows="4" required></textarea>
-    </div>
-    <div class="form-group">
-        <label for="photos">Фотографії (максимум 10):</label>
-        <input type="file" id="photos" accept="image/*" multiple class="photo-upload">
-        <div id="photoCount"></div>
-        <div id="photoPreview" class="photo-preview"></div>
-    </div>
-    <div class="form-group">
-        <label for="sellerContact">Контактні дані:</label>
-        <input type="text" id="sellerContact" required>
-    </div>
-    <button type="submit">Розмістити оголошення</button>
+    <button type="submit">Надіслати оголошення</button>
 </form>
+
+<!-- Інші форми (реклама, купівля, продаж) з подібними полями для фото -->
 
 <script>
     let tg = window.Telegram.WebApp;
     tg.expand();
 
-    // Функція для конвертації фото в base64
-    function getBase64(file) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = error => reject(error);
-        });
-    }
-
-    // Обробка попереднього перегляду фото
-    document.getElementById('photos')?.addEventListener('change', async function(e) {
-        const preview = document.getElementById('photoPreview');
-        const photoCount = document.getElementById('photoCount');
-        preview.innerHTML = '';
-        
-        if (this.files.length > 10) {
-            alert('Можна вибрати максимум 10 фотографій');
-            this.value = '';
-            return;
-        }
-
-        photoCount.textContent = `Вибрано фотографій: ${this.files.length}/10`;
-
-        for (let file of this.files) {
-            const img = document.createElement('img');
-            img.src = URL.createObjectURL(file);
-            preview.appendChild(img);
-        }
-    });
-
-    // Оновлений обробник подання форми
-    document.getElementById('sellingForm')?.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const formData = {};
-        
-        // Збираємо всі поля форми
-        this.querySelectorAll('input:not([type="file"]), textarea, select').forEach(element => {
-            formData[element.id] = element.value;
-        });
-        
-        // Обробка фотографій
-        const photoInput = this.querySelector('#photos');
-        if (photoInput?.files.length > 0) {
-            formData.photos = [];
-            for (let file of photoInput.files) {
-                try {
-                    const base64 = await getBase64(file);
-                    formData.photos.push(base64);
-                } catch (error) {
-                    console.error('Помилка конвертації фото:', error);
-                }
-            }
-        }
-        
-        // Додаємо тип форми
-        formData.formType = 'selling';
-        
-        // Відправляємо дані в Telegram
-        tg.sendData(JSON.stringify(formData));
-        tg.close();
-    });
-
-    // Показуємо потрібну форму при завантаженні фі
+    // Визначаємо, яку форму показувати
     function showForm() {
         const formType = new URLSearchParams(window.location.search).get('type');
         const forms = {
+            'announcement': 'announcementForm',
+            'advertising': 'advertisingForm',
+            'buying': 'buyingForm',
             'selling': 'sellingForm'
         };
         
@@ -188,7 +100,70 @@
         }
     }
 
+    // Функція для відображення попереднього перегляду зображень
+    function previewImages(input, previewContainerId) {
+        const previewContainer = document.getElementById(previewContainerId);
+        previewContainer.innerHTML = ''; // Очищуємо попередній перегляд
+        
+        Array.from(input.files).forEach(file => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                previewContainer.appendChild(img);
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    // Обробники для полів зображень
+    document.getElementById('announcementImages').addEventListener('change', function() {
+        previewImages(this, 'announcementImagePreview');
+    });
+
+    // Обробники подій для кожної форми
+    const forms = ['announcementForm', 'advertisingForm', 'buyingForm', 'sellingForm'];
+    forms.forEach(formId => {
+        document.getElementById(formId)?.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData();
+
+            // Збираємо всі поля форми
+            this.querySelectorAll('input, textarea, select').forEach(element => {
+                if (element.type === 'file') {
+                    // Додаємо файли (зображення) до FormData
+                    Array.from(element.files).forEach((file, index) => {
+                        formData.append(`${element.id}[${index}]`, file);
+                    });
+                } else {
+                    formData.append(element.id, element.value);
+                }
+            });
+
+            // Додаємо тип форми
+            formData.append('formType', formId.replace('Form', ''));
+
+            // Конвертуємо FormData в об'єкт і потім у JSON
+            const data = {};
+            formData.forEach((value, key) => {
+                if (value instanceof File) {
+                    data[key] = value.name; // Ім'я файлу
+                } else {
+                    data[key] = value;
+                }
+            });
+
+            // Відправляємо дані в Telegram
+            tg.sendData(JSON.stringify(data));
+
+            // Закриваємо WebApp після відправки
+            tg.close();
+        });
+    });
+
+    // Показуємо потрібну форму при завантаженні
     showForm();
 </script>
+
 </body>
 </html>
