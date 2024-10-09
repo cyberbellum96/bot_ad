@@ -1,4 +1,3 @@
-<!-- announcement.html -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -41,14 +40,18 @@
             background-color: #006699;
         }
         .price-input {
-            position: relative;
+            display: flex;
+            gap: 10px;
         }
-        .price-input:after {
-            content: "грн";
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
+        .price-input input {
+            flex: 1;
+        }
+        .currency-select {
+            width: 60px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: white;
         }
     </style>
 </head>
@@ -106,6 +109,11 @@
         <label for="budget">Бюджет:</label>
         <div class="price-input">
             <input type="number" id="budget" required>
+            <select id="budgetCurrency" class="currency-select">
+                <option value="UAH">₴</option>
+                <option value="USD">$</option>
+                <option value="EUR">€</option>
+            </select>
         </div>
     </div>
     <div class="form-group">
@@ -136,6 +144,11 @@
         <label for="maxPrice">Максимальна ціна:</label>
         <div class="price-input">
             <input type="number" id="maxPrice" required>
+            <select id="maxPriceCurrency" class="currency-select">
+                <option value="UAH">₴</option>
+                <option value="USD">$</option>
+                <option value="EUR">€</option>
+            </select>
         </div>
     </div>
     <div class="form-group">
@@ -170,6 +183,11 @@
         <label for="price">Ціна:</label>
         <div class="price-input">
             <input type="number" id="price" required>
+            <select id="priceCurrency" class="currency-select">
+                <option value="UAH">₴</option>
+                <option value="USD">$</option>
+                <option value="EUR">€</option>
+            </select>
         </div>
     </div>
     <div class="form-group">
@@ -230,8 +248,9 @@
         });
     });
 
-    // Показуємо потрібну форму при завантаженні 1
+    // Показуємо потрібну форму при завантаженні
     showForm();
 </script>
+
 </body>
 </html>
