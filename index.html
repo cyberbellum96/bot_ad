@@ -1,3 +1,4 @@
+<!-- announcement.html -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -42,8 +43,12 @@
         .price-input {
             position: relative;
         }
-        .price-input select {
-            margin-left: 10px;
+        .price-input:after {
+            content: "грн";
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
         }
     </style>
 </head>
@@ -74,11 +79,7 @@
         <label for="contact">Контактні дані:</label>
         <input type="text" id="contact" required>
     </div>
-    <div class="form-group">
-        <button type="button" id="uploadPhotosBtn">Завантажити фото</button>
-        <button type="submit">Надіслати</button>
-        <button type="button" id="cancelBtn">Скасувати</button>
-    </div>
+    <button type="submit">Надіслати оголошення</button>
 </form>
 
 <!-- Форма для розділу "Реклама" -->
@@ -101,24 +102,17 @@
         <label for="adDescription">Опис реклами:</label>
         <textarea id="adDescription" rows="4" required></textarea>
     </div>
-    <div class="form-group price-input">
+    <div class="form-group">
         <label for="budget">Бюджет:</label>
-        <input type="number" id="budget" required>
-        <select id="currency" required>
-            <option value="UAH">грн</option>
-            <option value="USD">USD</option>
-            <option value="EUR">EUR</option>
-        </select>
+        <div class="price-input">
+            <input type="number" id="budget" required>
+        </div>
     </div>
     <div class="form-group">
         <label for="adContact">Контактна особа:</label>
         <input type="text" id="adContact" required>
     </div>
-    <div class="form-group">
-        <button type="button" id="uploadPhotosBtn">Завантажити фото</button>
-        <button type="submit">Надіслати</button>
-        <button type="button" id="cancelBtn">Скасувати</button>
-    </div>
+    <button type="submit">Надіслати заявку</button>
 </form>
 
 <!-- Форма для розділу "Купівля" -->
@@ -138,14 +132,11 @@
             <option value="other">Інше</option>
         </select>
     </div>
-    <div class="form-group price-input">
+    <div class="form-group">
         <label for="maxPrice">Максимальна ціна:</label>
-        <input type="number" id="maxPrice" required>
-        <select id="currency" required>
-            <option value="UAH">грн</option>
-            <option value="USD">USD</option>
-            <option value="EUR">EUR</option>
-        </select>
+        <div class="price-input">
+            <input type="number" id="maxPrice" required>
+        </div>
     </div>
     <div class="form-group">
         <label for="buyerDescription">Додатковий опис:</label>
@@ -155,11 +146,7 @@
         <label for="buyerContact">Контактні дані:</label>
         <input type="text" id="buyerContact" required>
     </div>
-    <div class="form-group">
-        <button type="button" id="uploadPhotosBtn">Завантажити фото</button>
-        <button type="submit">Надіслати</button>
-        <button type="button" id="cancelBtn">Скасувати</button>
-    </div>
+    <button type="submit">Надіслати запит</button>
 </form>
 
 <!-- Форма для розділу "Продаж" -->
@@ -179,14 +166,11 @@
             <option value="other">Інше</option>
         </select>
     </div>
-    <div class="form-group price-input">
+    <div class="form-group">
         <label for="price">Ціна:</label>
-        <input type="number" id="price" required>
-        <select id="currency" required>
-            <option value="UAH">грн</option>
-            <option value="USD">USD</option>
-            <option value="EUR">EUR</option>
-        </select>
+        <div class="price-input">
+            <input type="number" id="price" required>
+        </div>
     </div>
     <div class="form-group">
         <label for="condition">Стан:</label>
@@ -203,39 +187,51 @@
         <label for="sellerContact">Контактні дані:</label>
         <input type="text" id="sellerContact" required>
     </div>
-    <div class="form-group">
-        <button type="button" id="uploadPhotosBtn">Завантажити фото</button>
-        <button type="submit">Надіслати</button>
-        <button type="button" id="cancelBtn">Скасувати</button>
-    </div>
+    <button type="submit">Розмістити оголошення</button>
 </form>
 
 <script>
     let tg = window.Telegram.WebApp;
     tg.expand();
 
-    // Визначаємо дію при натисканні на кнопку "Скасувати"
-    document.getElementById('cancelBtn').addEventListener('click', function() {
-        tg.close(); // Закриває веб-ап
-    });
+    // Визначаємо, яку форму показувати
+    function showForm() {
+        const formType = new URLSearchParams(window.location.search).get('type');
+        const forms = {
+            'announcement': 'announcementForm',
+            'advertising': 'advertisingForm',
+            'buying': 'buyingForm',
+            'selling': 'sellingForm'
+        };
+        
+        if (forms[formType]) {
+            document.getElementById(forms[formType]).style.display = 'block';
+        }
+    }
 
-    // При натисканні на кнопку "Завантажити фото"
-    document.getElementById('uploadPhotosBtn').addEventListener('click', function() {
-        alert("Функціонал завантаження фото поки що не реалізовано.");
-    });
-
-    // При натисканні на кнопку "Надіслати"
-    document.querySelectorAll('form').forEach(form => {
-        form.addEventListener('submit', function(event) {
-            event.preventDefault();
-            alert("Форма успішно надіслана!");
-            tg.close(); // Закриває веб-ап після успішної відправки
+    // Обробники подій для кожної форми
+    const forms = ['announcementForm', 'advertisingForm', 'buyingForm', 'sellingForm'];
+    forms.forEach(formId => {
+        document.getElementById(formId)?.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = {};
+            
+            // Збираємо всі поля форми
+            this.querySelectorAll('input, textarea, select').forEach(element => {
+                formData[element.id] = element.value;
+            });
+            
+            // Додаємо тип форми
+            formData.formType = formId.replace('Form', '');
+            
+            // Відправляємо дані в Telegram
+            tg.sendData(JSON.stringify(formData));
+            tg.close();
         });
     });
 
-    // Приклад показу форми "Продаж"
-    document.getElementById('sellingForm').style.display = 'block'; // Показуємо форму "Продаж"
+    // Показуємо потрібну форму при завантаженні 1
+    showForm();
 </script>
-
 </body>
 </html>
