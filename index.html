@@ -1,8 +1,7 @@
-<!-- announcement.html -->
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Форма оголошення</title>
+    <title>Форма подання</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -40,116 +39,30 @@
         button:hover {
             background-color: #006699;
         }
-        .price-input {
-            position: relative;
+        .photo-preview {
+            max-width: 100%;
+            margin: 10px 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
         }
-        .price-input:after {
-            content: "грн";
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
+        .photo-preview img {
+            max-width: 100px;
+            height: auto;
+            border-radius: 4px;
+        }
+        .photo-upload {
+            margin: 10px 0;
+        }
+        #photoCount {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
         }
     </style>
 </head>
 <body>
 
-<!-- Форма для розділу "Оголошення" -->
-<form id="announcementForm" style="display: none;">
-    <h2>Подати оголошення</h2>
-    <div class="form-group">
-        <label for="title">Заголовок оголошення:</label>
-        <input type="text" id="title" required>
-    </div>
-    <div class="form-group">
-        <label for="category">Категорія:</label>
-        <select id="category" required>
-            <option value="">Оберіть категорію</option>
-            <option value="jobs">Робота</option>
-            <option value="services">Послуги</option>
-            <option value="events">Події</option>
-            <option value="other">Інше</option>
-        </select>
-    </div>
-    <div class="form-group">
-        <label for="description">Текст оголошення:</label>
-        <textarea id="description" rows="4" required></textarea>
-    </div>
-    <div class="form-group">
-        <label for="contact">Контактні дані:</label>
-        <input type="text" id="contact" required>
-    </div>
-    <button type="submit">Надіслати оголошення</button>
-</form>
-
-<!-- Форма для розділу "Реклама" -->
-<form id="advertisingForm" style="display: none;">
-    <h2>Розмістити рекламу</h2>
-    <div class="form-group">
-        <label for="companyName">Назва компанії:</label>
-        <input type="text" id="companyName" required>
-    </div>
-    <div class="form-group">
-        <label for="adType">Тип реклами:</label>
-        <select id="adType" required>
-            <option value="">Оберіть тип реклами</option>
-            <option value="banner">Банерна реклама</option>
-            <option value="text">Текстова реклама</option>
-            <option value="post">Рекламний пост</option>
-        </select>
-    </div>
-    <div class="form-group">
-        <label for="adDescription">Опис реклами:</label>
-        <textarea id="adDescription" rows="4" required></textarea>
-    </div>
-    <div class="form-group">
-        <label for="budget">Бюджет:</label>
-        <div class="price-input">
-            <input type="number" id="budget" required>
-        </div>
-    </div>
-    <div class="form-group">
-        <label for="adContact">Контактна особа:</label>
-        <input type="text" id="adContact" required>
-    </div>
-    <button type="submit">Надіслати заявку</button>
-</form>
-
-<!-- Форма для розділу "Купівля" -->
-<form id="buyingForm" style="display: none;">
-    <h2>Купівля товару</h2>
-    <div class="form-group">
-        <label for="productName">Що шукаєте:</label>
-        <input type="text" id="productName" required>
-    </div>
-    <div class="form-group">
-        <label for="buyingCategory">Категорія:</label>
-        <select id="buyingCategory" required>
-            <option value="">Оберіть категорію</option>
-            <option value="electronics">Електроніка</option>
-            <option value="furniture">Меблі</option>
-            <option value="transport">Транспорт</option>
-            <option value="other">Інше</option>
-        </select>
-    </div>
-    <div class="form-group">
-        <label for="maxPrice">Максимальна ціна:</label>
-        <div class="price-input">
-            <input type="number" id="maxPrice" required>
-        </div>
-    </div>
-    <div class="form-group">
-        <label for="buyerDescription">Додатковий опис:</label>
-        <textarea id="buyerDescription" rows="4"></textarea>
-    </div>
-    <div class="form-group">
-        <label for="buyerContact">Контактні дані:</label>
-        <input type="text" id="buyerContact" required>
-    </div>
-    <button type="submit">Надіслати запит</button>
-</form>
-
-<!-- Форма для розділу "Продаж" -->
 <form id="sellingForm" style="display: none;">
     <h2>Продаж товару</h2>
     <div class="form-group">
@@ -184,6 +97,12 @@
         <textarea id="sellerDescription" rows="4" required></textarea>
     </div>
     <div class="form-group">
+        <label for="photos">Фотографії (максимум 10):</label>
+        <input type="file" id="photos" accept="image/*" multiple class="photo-upload">
+        <div id="photoCount"></div>
+        <div id="photoPreview" class="photo-preview"></div>
+    </div>
+    <div class="form-group">
         <label for="sellerContact">Контактні дані:</label>
         <input type="text" id="sellerContact" required>
     </div>
@@ -194,13 +113,73 @@
     let tg = window.Telegram.WebApp;
     tg.expand();
 
-    // Визначаємо, яку форму показувати
+    // Функція для конвертації фото в base64
+    function getBase64(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = error => reject(error);
+        });
+    }
+
+    // Обробка попереднього перегляду фото
+    document.getElementById('photos')?.addEventListener('change', async function(e) {
+        const preview = document.getElementById('photoPreview');
+        const photoCount = document.getElementById('photoCount');
+        preview.innerHTML = '';
+        
+        if (this.files.length > 10) {
+            alert('Можна вибрати максимум 10 фотографій');
+            this.value = '';
+            return;
+        }
+
+        photoCount.textContent = `Вибрано фотографій: ${this.files.length}/10`;
+
+        for (let file of this.files) {
+            const img = document.createElement('img');
+            img.src = URL.createObjectURL(file);
+            preview.appendChild(img);
+        }
+    });
+
+    // Оновлений обробник подання форми
+    document.getElementById('sellingForm')?.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const formData = {};
+        
+        // Збираємо всі поля форми
+        this.querySelectorAll('input:not([type="file"]), textarea, select').forEach(element => {
+            formData[element.id] = element.value;
+        });
+        
+        // Обробка фотографій
+        const photoInput = this.querySelector('#photos');
+        if (photoInput?.files.length > 0) {
+            formData.photos = [];
+            for (let file of photoInput.files) {
+                try {
+                    const base64 = await getBase64(file);
+                    formData.photos.push(base64);
+                } catch (error) {
+                    console.error('Помилка конвертації фото:', error);
+                }
+            }
+        }
+        
+        // Додаємо тип форми
+        formData.formType = 'selling';
+        
+        // Відправляємо дані в Telegram
+        tg.sendData(JSON.stringify(formData));
+        tg.close();
+    });
+
+    // Показуємо потрібну форму при завантаженні
     function showForm() {
         const formType = new URLSearchParams(window.location.search).get('type');
         const forms = {
-            'announcement': 'announcementForm',
-            'advertising': 'advertisingForm',
-            'buying': 'buyingForm',
             'selling': 'sellingForm'
         };
         
@@ -209,28 +188,6 @@
         }
     }
 
-    // Обробники подій для кожної форми
-    const forms = ['announcementForm', 'advertisingForm', 'buyingForm', 'sellingForm'];
-    forms.forEach(formId => {
-        document.getElementById(formId)?.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const formData = {};
-            
-            // Збираємо всі поля форми
-            this.querySelectorAll('input, textarea, select').forEach(element => {
-                formData[element.id] = element.value;
-            });
-            
-            // Додаємо тип форми
-            formData.formType = formId.replace('Form', '');
-            
-            // Відправляємо дані в Telegram
-            tg.sendData(JSON.stringify(formData));
-            tg.close();
-        });
-    });
-
-    // Показуємо потрібну форму при завантаженні
     showForm();
 </script>
 </body>
