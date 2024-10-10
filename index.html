@@ -27,6 +27,19 @@
             border-radius: 4px;
             box-sizing: border-box;
         }
+        input[type="radio"], input[type="checkbox"] {
+            width: auto;
+            margin-right: 5px;
+        }
+        .radio-group {
+            margin: 10px 0;
+        }
+        .radio-option {
+            margin-right: 15px;
+            display: inline-flex;
+            align-items: center;
+            font-size: 12px;
+        }
         button {
             background-color: #0088cc;
             color: white;
@@ -42,6 +55,7 @@
         .price-input {
             display: flex;
             gap: 10px;
+            margin-bottom: 10px;
         }
         .price-input input {
             flex: 1;
@@ -52,6 +66,12 @@
             border: 1px solid #ddd;
             border-radius: 4px;
             background-color: white;
+        }
+        .checkbox-group {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
         }
     </style>
 </head>
@@ -71,6 +91,10 @@
             <option value="jobs">Робота</option>
             <option value="services">Послуги</option>
             <option value="events">Події</option>
+            <option value="realty">Нерухомість</option>
+            <option value="education">Освіта</option>
+            <option value="health">Здоров'я</option>
+            <option value="entertainment">Розваги</option>
             <option value="other">Інше</option>
         </select>
     </div>
@@ -81,6 +105,12 @@
     <div class="form-group">
         <label for="contact">Контактні дані:</label>
         <input type="text" id="contact" required>
+    </div>
+    <div class="checkbox-group">
+        <label class="radio-option">
+            <input type="checkbox" id="isPinned" name="isPinned">
+            Закріпити оголошення на 3 доби за 30 грн
+        </label>
     </div>
     <button type="submit">Надіслати оголошення</button>
 </form>
@@ -97,7 +127,7 @@
         <select id="adType" required>
             <option value="">Оберіть тип реклами</option>
             <option value="publication">Публікація</option>
-            <option value="pin">Публікація + закріплення</option>
+            <option value="publication-pin">Публікація + закріпити</option>
         </select>
     </div>
     <div class="form-group">
@@ -125,6 +155,12 @@
             <option value="electronics">Електроніка</option>
             <option value="furniture">Меблі</option>
             <option value="transport">Транспорт</option>
+            <option value="clothing">Одяг та взуття</option>
+            <option value="sports">Спорт та відпочинок</option>
+            <option value="tools">Інструменти</option>
+            <option value="appliances">Побутова техніка</option>
+            <option value="toys">Іграшки</option>
+            <option value="books">Книги</option>
             <option value="other">Інше</option>
         </select>
     </div>
@@ -147,6 +183,12 @@
         <label for="buyerContact">Контактні дані:</label>
         <input type="text" id="buyerContact" required>
     </div>
+    <div class="checkbox-group">
+        <label class="radio-option">
+            <input type="checkbox" id="isPinned" name="isPinned">
+            Закріпити оголошення на 3 доби за 30 грн
+        </label>
+    </div>
     <button type="submit">Надіслати запит</button>
 </form>
 
@@ -164,19 +206,35 @@
             <option value="electronics">Електроніка</option>
             <option value="furniture">Меблі</option>
             <option value="transport">Транспорт</option>
+            <option value="clothing">Одяг та взуття</option>
+            <option value="sports">Спорт та відпочинок</option>
+            <option value="tools">Інструменти</option>
+            <option value="appliances">Побутова техніка</option>
+            <option value="toys">Іграшки</option>
+            <option value="books">Книги</option>
             <option value="other">Інше</option>
         </select>
     </div>
     <div class="form-group">
         <label for="price">Ціна:</label>
         <div class="price-input">
-            <input type="number" id="price" required>
+            <input type="number" id="price">
             <select id="priceCurrency" class="currency-select">
                 <option value="UAH">₴</option>
                 <option value="USD">$</option>
                 <option value="EUR">€</option>
             </select>
         </div>
+    <div class="radio-group">
+        <label class="radio-option">
+            <input type="radio" name="priceType" id="specifiedPrice" value="specifiedPrice" checked> Вказати ціну
+        </label>
+        <label class="radio-option">
+            <input type="radio" name="priceType" id="negotiablePrice" value="negotiablePrice"> Договірна
+        </label>
+        <label class="radio-option">
+            <input type="radio" name="priceType" id="isFree" value="isFree"> Віддам даром
+        </label>
     </div>
     <div class="form-group">
         <label for="condition">Стан:</label>
@@ -193,12 +251,46 @@
         <label for="sellerContact">Контактні дані:</label>
         <input type="text" id="sellerContact" required>
     </div>
+    <div class="checkbox-group">
+        <label class="radio-option">
+            <input type="checkbox" id="isPinned" name="isPinned">
+            Закріпити оголошення на 3 доби за 30 грн
+        </label>
+    </div>
     <button type="submit">Розмістити оголошення</button>
 </form>
 
 <script>
     let tg = window.Telegram.WebApp;
     tg.expand();
+
+    // Функція для керування полем ціни в формі продажу
+    function handlePriceField() {
+        const priceInput = document.querySelector('#sellingForm #price');
+        const priceCurrency = document.querySelector('#sellingForm #priceCurrency');
+        const negotiableRadio = document.querySelector('#negotiablePrice');
+        const freeRadio = document.querySelector('#isFree');
+        const specifiedPriceRadio = document.querySelector('#specifiedPrice');
+
+        if (negotiableRadio && freeRadio && specifiedPriceRadio && priceInput && priceCurrency) {
+            const updatePriceField = () => {
+                const isDisabled = negotiableRadio.checked || freeRadio.checked;
+                priceInput.disabled = isDisabled;
+                priceCurrency.disabled = isDisabled;
+                priceInput.required = !isDisabled;
+                
+                if (isDisabled) {
+                    priceInput.value = '';
+                }
+            };
+
+            negotiableRadio.addEventListener('change', updatePriceField);
+            freeRadio.addEventListener('change', updatePriceField);
+            specifiedPriceRadio.addEventListener('change', updatePriceField);
+            updatePriceField();
+        }
+    }
+
 
     // Визначаємо, яку форму показувати
     function showForm() {
@@ -212,6 +304,9 @@
         
         if (forms[formType]) {
             document.getElementById(forms[formType]).style.display = 'block';
+            if (formType === 'selling') {
+                handlePriceField();
+            }
         }
     }
 
@@ -224,12 +319,21 @@
             
             // Збираємо всі поля форми
             this.querySelectorAll('input, textarea, select').forEach(element => {
-                formData[element.id] = element.value;
+                if (element.type === 'radio') {
+                    if (element.checked) {
+                        formData[element.id] = true;
+                    }
+                } else if (element.type === 'checkbox') {
+                    formData[element.id] = element.checked;
+                } else {
+                    formData[element.id] = element.value;
+                }
             });
             
             // Додаємо тип форми
             formData.formType = formId.replace('Form', '');
-            
+            console.log(formData); // Додайте це перед tg.sendData
+
             // Відправляємо дані в Telegram
             tg.sendData(JSON.stringify(formData));
             tg.close();
