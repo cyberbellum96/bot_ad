@@ -124,11 +124,29 @@
     </div>
     <div class="form-group">
         <label for="adType">Тип реклами:</label>
-        <select id="adType" required>
+        <select id="adType" required onchange="updatePrice()">
             <option value="">Оберіть тип реклами</option>
             <option value="publication">Публікація</option>
             <option value="publication-pin">Публікація + закріпити</option>
         </select>
+    </div>
+    <div class="form-group">
+        <label>Розмістити рекламу на:</label>
+        <div class="radio-group">
+            <label class="radio-option">
+                <input type="radio" name="duration" value="12" onchange="updatePrice()"> 12 годин
+            </label>
+            <label class="radio-option">
+                <input type="radio" name="duration" value="24" onchange="updatePrice()"> 1 добу
+            </label>
+            <label class="radio-option">
+                <input type="radio" name="duration" value="72" onchange="updatePrice()"> 3 доби
+            </label>
+            <label class="radio-option">
+                <input type="radio" name="duration" value="168" onchange="updatePrice()"> 7 діб
+            </label>
+        </div>
+        <p style="font-size: 10px; color: #666; margin-top: 5px;">Після завершення періоду реклами - публікація видаляється!</p>
     </div>
     <div class="form-group">
         <label for="adDescription">Опис реклами:</label>
@@ -137,6 +155,9 @@
     <div class="form-group">
         <label for="adContact">Контактна особа:</label>
         <input type="text" id="adContact" required>
+    </div>
+    <div class="price-calculation" style="margin: 15px 0; padding: 10px; background-color: #f8f9fa; border-radius: 4px;">
+        <label>Розрахунок вартості: <span id="totalPrice">0</span> грн.</label>
     </div>
     <button type="submit">Надіслати заявку</button>
 </form>
@@ -167,7 +188,7 @@
     <div class="form-group">
         <label for="maxPrice">Максимальна ціна:</label>
         <div class="price-input">
-            <input type="number" id="maxPrice" required>
+            <input type="text" id="maxPrice" required>
             <select id="maxPriceCurrency" class="currency-select">
                 <option value="UAH">₴</option>
                 <option value="USD">$</option>
@@ -218,29 +239,41 @@
     <div class="form-group">
         <label for="price">Ціна:</label>
         <div class="price-input">
-            <input type="number" id="price">
+            <input type="text" id="price">
             <select id="priceCurrency" class="currency-select">
                 <option value="UAH">₴</option>
                 <option value="USD">$</option>
                 <option value="EUR">€</option>
             </select>
+            <label class="radio-option">
+                <input type="checkbox" id="isNegotiable" name="isNegotiable"> Торг
+            </label>
         </div>
-    <div class="radio-group">
-        <label class="radio-option">
-            <input type="radio" name="priceType" id="specifiedPrice" value="specifiedPrice" checked> Вказати ціну
-        </label>
-        <label class="radio-option">
-            <input type="radio" name="priceType" id="negotiablePrice" value="negotiablePrice"> Договірна
-        </label>
-        <label class="radio-option">
-            <input type="radio" name="priceType" id="isFree" value="isFree"> Віддам даром
-        </label>
-    </div>
+        <div class="radio-group" style="display: flex; flex-direction: column;">
+            <div class="radio-option">
+                <label>
+                    <input type="radio" name="priceType" id="specifiedPrice" value="specifiedPrice" checked>
+                    Вказати ціну
+                </label>
+            </div>
+            <div class="radio-option">
+                <label>
+                    <input type="radio" name="priceType" id="negotiablePrice" value="negotiablePrice">
+                    Договірна
+                </label>
+            </div>
+            <div class="radio-option">
+                <label>
+                    <input type="radio" name="priceType" id="isFree" value="isFree">
+                    Віддам даром
+                </label>
+            </div>
+        </div>
     <div class="form-group">
         <label for="condition">Стан:</label>
         <select id="condition" required>
-            <option value="new">Новий</option>
-            <option value="used">Вживаний</option>
+            <option value="Новий">Новий</option>
+            <option value="Вживаний">Вживаний</option>
         </select>
     </div>
     <div class="form-group">
@@ -271,25 +304,28 @@
         const negotiableRadio = document.querySelector('#negotiablePrice');
         const freeRadio = document.querySelector('#isFree');
         const specifiedPriceRadio = document.querySelector('#specifiedPrice');
+        const isNegotiableCheckbox = document.querySelector('#isNegotiable');
 
-        if (negotiableRadio && freeRadio && specifiedPriceRadio && priceInput && priceCurrency) {
-            const updatePriceField = () => {
-                const isDisabled = negotiableRadio.checked || freeRadio.checked;
-                priceInput.disabled = isDisabled;
-                priceCurrency.disabled = isDisabled;
-                priceInput.required = !isDisabled;
-                
-                if (isDisabled) {
-                    priceInput.value = '';
-                }
-            };
+        if (negotiableRadio && freeRadio && specifiedPriceRadio && priceInput && priceCurrency && isNegotiableCheckbox) {
+        const updatePriceField = () => {
+            const isDisabled = negotiableRadio.checked || freeRadio.checked;
+            priceInput.disabled = isDisabled;
+            priceCurrency.disabled = isDisabled;
+            isNegotiableCheckbox.disabled = isDisabled;
+            priceInput.required = !isDisabled;
+            
+            if (isDisabled) {
+                priceInput.value = '';
+                isNegotiableCheckbox.checked = false;
+            }
+        };
 
-            negotiableRadio.addEventListener('change', updatePriceField);
-            freeRadio.addEventListener('change', updatePriceField);
-            specifiedPriceRadio.addEventListener('change', updatePriceField);
-            updatePriceField();
-        }
+        negotiableRadio.addEventListener('change', updatePriceField);
+        freeRadio.addEventListener('change', updatePriceField);
+        specifiedPriceRadio.addEventListener('change', updatePriceField);
+        updatePriceField();
     }
+}
 
 
     // Визначаємо, яку форму показувати
@@ -309,6 +345,130 @@
             }
         }
     }
+
+    function updatePrice() {
+    const adType = document.getElementById('adType').value;
+    const duration = document.querySelector('input[name="duration"]:checked')?.value;
+    let totalPrice = 0;
+
+    // Базова ціна в залежності від типу реклами
+    if (adType === 'publication') {
+        totalPrice += 50;
+    } else if (adType === 'publication-pin') {
+        totalPrice += 250;
+    }
+
+    // Додаткова ціна в залежності від тривалості
+    if (duration) {
+        switch (duration) {
+            case '12':
+                totalPrice += 50;
+                break;
+            case '24':
+                totalPrice += 100;
+                break;
+            case '72':
+                totalPrice += 200;
+                break;
+            case '168':
+                totalPrice += 500;
+                break;
+        }
+    }
+
+    document.getElementById('totalPrice').textContent = totalPrice;
+    
+        // Зберігаємо ціну та тип в прихованих полях для відправки
+        const formData = document.getElementById('advertisingForm');
+        if (!formData.querySelector('#finalPrice')) {
+                const priceInput = document.createElement('input');
+                priceInput.type = 'hidden';
+                priceInput.id = 'finalPrice';
+                formData.appendChild(priceInput);
+        }
+        document.getElementById('finalPrice').value = totalPrice;
+    }
+
+
+// Функція для форматування ціни
+function formatPriceInput(input) {
+    // Видаляємо всі пробіли та замінюємо кому на крапку
+    let value = input.value.replace(/\s+/g, '').replace(',', '.');
+
+    // Перевіряємо, чи введене значення є числом
+    if (!isNaN(value) && value.length > 0) {
+        // Форматуємо число з двома десятковими знаками та пробілами між тисячами
+        const formattedValue = parseFloat(value).toLocaleString('uk-UA', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+        input.value = formattedValue;
+    } else {
+        // Якщо введено недопустимі символи, очищаємо поле
+        input.value = '';
+    }
+}
+
+// Додаємо обробники подій для полів "Продаж" та "Купівля"
+function addPriceFormatting() {
+    // Поле "Продаж" (SellingForm)
+    const sellingPriceInput = document.querySelector('#sellingForm #price');
+    if (sellingPriceInput) {
+        // Форматуємо після завершення введення (на подію blur)
+        sellingPriceInput.addEventListener('blur', function() {
+            formatPriceInput(sellingPriceInput);
+        });
+
+        // Опціонально: Форматуємо під час введення (на подію input)
+        sellingPriceInput.addEventListener('input', function() {
+            // Дозволяємо вводити тільки числа, пробіли та крапки
+            sellingPriceInput.value = sellingPriceInput.value.replace(/[^0-9.,\s]/g, '');
+        });
+    }
+
+    // Поле "Купівля" (BuyingForm)
+    const buyingMaxPriceInput = document.querySelector('#buyingForm #maxPrice');
+    if (buyingMaxPriceInput) {
+        // Форматуємо після завершення введення (на подію blur)
+        buyingMaxPriceInput.addEventListener('blur', function() {
+            formatPriceInput(buyingMaxPriceInput);
+        });
+
+        // Опціонально: Форматуємо під час введення (на подію input)
+        buyingMaxPriceInput.addEventListener('input', function() {
+            // Дозволяємо вводити тільки числа, пробіли та крапки
+            buyingMaxPriceInput.value = buyingMaxPriceInput.value.replace(/[^0-9.,\s]/g, '');
+        });
+    }
+}
+
+// Викликаємо функцію додавання обробників після визначення всіх функцій
+addPriceFormatting();
+
+
+    // Оновлюємо обробник форми реклами
+    document.getElementById('advertisingForm')?.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = {};
+        
+        // Збираємо всі поля форми
+        this.querySelectorAll('input, textarea, select').forEach(element => {
+            if (element.type === 'radio' && element.name === 'duration') {
+                if (element.checked) {
+                    formData['duration'] = element.value;
+                }
+            } else if (element.type !== 'radio') {
+                formData[element.id] = element.value;
+            }
+        });
+        
+        // Додаємо тип форми
+        formData.formType = 'advertising';
+        
+        // Відправляємо дані в Telegram
+        tg.sendData(JSON.stringify(formData));
+        tg.close();
+    });   
 
     // Обробники подій для кожної форми
     const forms = ['announcementForm', 'advertisingForm', 'buyingForm', 'sellingForm'];
